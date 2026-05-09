@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-from edgar import set_identity, get_filings, Company
+from edgar import set_identity, get_filings
 
 load_dotenv()
 set_identity(os.environ["EDGAR_IDENTITY"])

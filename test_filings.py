@@ -1,7 +1,7 @@
 import os, requests, time, pandas as pd
 from dataclasses import asdict
 from edgar import set_identity, get_filings
-from extractor import extract_offering_terms
+from include.extractor import extract_offering_terms
 from dotenv import load_dotenv
 
 load_dotenv()

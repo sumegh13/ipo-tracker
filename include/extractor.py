@@ -174,6 +174,11 @@ def extract_offering_terms(html: str) -> OfferingTerms:
     offering_type = classify_offering(cover)
     low, high = extract_price_range(cover)
     shares = extract_shares_offered(cover)
+
+    # Only fall back to LLM for IPOs where we got nothing
+    if offering_type == "ipo" and low is None and shares is None:
+        return extract_with_llm(cover)
+
     return OfferingTerms(
         shares_offered=shares,
         price_low=low,

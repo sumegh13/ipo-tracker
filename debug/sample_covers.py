@@ -5,7 +5,7 @@ import json
 import time
 import requests
 from edgar import set_identity, get_filings
-from extractor import get_cover_page_text
+from include.extractor import get_cover_page_text
 from dotenv import load_dotenv
 
 load_dotenv()
