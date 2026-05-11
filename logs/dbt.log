@@ -1,0 +1,50 @@
+[0m13:03:47.157464 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x1079c5350>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x113d60ed0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x113d77450>]}
+
+
+============================== 13:03:47.160233 | 9232e3d2-8989-4920-96c9-ded574059773 ==============================
+[0m13:03:47.160233 [info ] [MainThread]: Running with dbt=1.11.9
+[0m13:03:47.160565 [debug] [MainThread]: running dbt with arguments {'indirect_selection': 'eager', 'log_cache_events': 'False', 'log_format': 'default', 'log_path': 'logs', 'warn_error': 'None', 'use_colors': 'True', 'fail_fast': 'False', 'introspect': 'True', 'invocation_command': 'dbt init ipo_tracker_dbt', 'empty': 'None', 'cache_selected_only': 'False', 'use_experimental_parser': 'False', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'version_check': 'True', 'debug': 'False', 'no_print': 'None', 'write_json': 'True', 'target_path': 'None', 'quiet': 'False', 'static_parser': 'True', 'printer_width': '80', 'profiles_dir': '/Users/sumegh/.dbt', 'send_anonymous_usage_stats': 'True', 'partial_parse': 'True'}
+[0m13:03:47.169513 [info ] [MainThread]: Creating dbt configuration folder at /Users/sumegh/.dbt
+[0m13:03:47.170457 [debug] [MainThread]: Starter project path: /Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/site-packages/dbt/include/starter_project
+[0m13:03:47.174643 [info ] [MainThread]: 
+Your new dbt project "ipo_tracker_dbt" was created!
+
+For more information on how to configure the profiles.yml file,
+please consult the dbt documentation here:
+
+  https://docs.getdbt.com/docs/configure-your-profile
+
+One more thing:
+
+Need help? Don't hesitate to reach out to us via GitHub issues or on Slack:
+
+  https://community.getdbt.com/
+
+Happy modeling!
+
+[0m13:03:47.174880 [info ] [MainThread]: Setting up your profile.
+[0m13:06:10.424618 [debug] [MainThread]: Snowflake adapter: Setting snowflake.connector to ERROR (file logging only)
+[0m13:06:10.425294 [debug] [MainThread]: Snowflake adapter: Setting botocore to ERROR (file logging only)
+[0m13:06:10.425473 [debug] [MainThread]: Snowflake adapter: Setting boto3 to ERROR (file logging only)
+[0m13:11:14.856451 [info ] [MainThread]: Profile ipo_tracker_dbt written to /Users/sumegh/.dbt/profiles.yml using target's profile_template.yml and your supplied values. Run 'dbt debug' to validate the connection.
+[0m13:11:14.958422 [debug] [MainThread]: Resource report: {"command_name": "init", "command_success": true, "command_wall_clock_time": 447.84967, "process_in_blocks": "0", "process_kernel_time": 0.461343, "process_mem_max_rss": "180944896", "process_out_blocks": "0", "process_user_time": 1.145151}
+[0m13:11:14.960998 [debug] [MainThread]: Command `dbt init` succeeded at 13:11:14.960841 after 447.85 seconds
+[0m13:11:14.961990 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x113388b50>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x1049a02d0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x104ae0cd0>]}
+[0m13:11:14.962589 [debug] [MainThread]: Flushing usage events
+[0m13:11:15.388264 [debug] [MainThread]: An error was encountered while trying to flush usage events
+[0m15:43:00.984813 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x1060c9990>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x1116db550>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x1118d39d0>]}
+
+
+============================== 15:43:00.987663 | bd014e26-3b4e-4fe7-84fb-75a96d106373 ==============================
+[0m15:43:00.987663 [info ] [MainThread]: Running with dbt=1.11.9
+[0m15:43:00.988003 [debug] [MainThread]: running dbt with arguments {'send_anonymous_usage_stats': 'True', 'log_path': 'logs', 'warn_error': 'None', 'introspect': 'True', 'debug': 'False', 'empty': 'False', 'invocation_command': 'dbt run', 'printer_width': '80', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'quiet': 'False', 'cache_selected_only': 'False', 'fail_fast': 'False', 'log_cache_events': 'False', 'indirect_selection': 'eager', 'version_check': 'True', 'use_experimental_parser': 'False', 'no_print': 'None', 'static_parser': 'True', 'partial_parse': 'True', 'log_format': 'default', 'profiles_dir': '/Users/sumegh/.dbt', 'target_path': 'None', 'use_colors': 'True', 'write_json': 'True'}
+[0m15:43:00.988340 [error] [MainThread]: Encountered an error:
+Runtime Error
+  No dbt_project.yml found at expected path /Users/sumegh/Documents/ipo-tracker/dbt_project.yml
+  Verify that each entry within packages.yml (and their transitive dependencies) contains a file named dbt_project.yml
+  
+[0m15:43:01.009381 [debug] [MainThread]: Resource report: {"command_name": "run", "command_success": false, "command_wall_clock_time": 0.07309954, "process_in_blocks": "0", "process_kernel_time": 0.215015, "process_mem_max_rss": "105611264", "process_out_blocks": "0", "process_user_time": 0.690397}
+[0m15:43:01.009695 [debug] [MainThread]: Command `dbt run` failed at 15:43:01.009645 after 0.07 seconds
+[0m15:43:01.009904 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x1118b8510>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x1118b8790>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x1118ba2d0>]}
+[0m15:43:01.010103 [debug] [MainThread]: Flushing usage events
+[0m15:43:01.382586 [debug] [MainThread]: An error was encountered while trying to flush usage events

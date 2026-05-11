@@ -1,0 +1,20 @@
+version: 2
+
+sources:
+  - name: raw
+    database: IPO_TRACKER
+    schema: RAW
+    tables:
+      - name: prospectus_filings
+        columns:
+          - name: cik
+            tests: [not_null]
+          - name: accession_number
+            tests: [not_null]
+      - name: offering_terms
+        columns:
+          - name: offering_type
+            tests:
+              - accepted_values:
+                  values: ['ipo', 'spac', 'follow_on', 'unknown']
+      - name: post_ipo_financials

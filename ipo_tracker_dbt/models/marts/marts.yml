@@ -1,0 +1,30 @@
+version: 2
+
+models:
+  - name: fct_ipo_offerings
+    description: One row per completed IPO with final pricing
+    columns:
+      - name: accession_number
+        tests: [unique, not_null]
+      - name: cik
+        tests: [not_null]
+      - name: final_price
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 0.01
+              max_value: 500
+      - name: shares_offered
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 10000
+              max_value: 1000000000
+      - name: offering_type
+        tests:
+          - accepted_values:
+              values: ['ipo']
+      - name: gross_proceeds
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: "> 0"
