@@ -5,6 +5,10 @@ sources:
     database: IPO_TRACKER
     schema: RAW
     tables:
+      - name: companies              # NEW
+        columns:
+          - name: cik
+            tests: [unique, not_null]
       - name: prospectus_filings
         columns:
           - name: cik

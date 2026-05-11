@@ -7,7 +7,6 @@ WITH dedup AS (
         filing_date,
         accession_number,
         form_type,
-        sic_code,
         filing_url,
         ingested_at,
         ROW_NUMBER() OVER (
@@ -19,6 +18,6 @@ WITH dedup AS (
 
 SELECT
     cik, company_name, filing_date, accession_number,
-    form_type, sic_code, filing_url
+    form_type, filing_url
 FROM dedup
 WHERE rn = 1

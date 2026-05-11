@@ -20,10 +20,6 @@ models:
           - dbt_utils.accepted_range:
               min_value: 10000
               max_value: 1000000000
-      - name: offering_type
-        tests:
-          - accepted_values:
-              values: ['ipo']
       - name: gross_proceeds
         tests:
           - dbt_utils.expression_is_true:

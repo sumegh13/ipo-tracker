@@ -9,6 +9,8 @@ terms AS (
       AND shares_offered IS NOT NULL
 ),
 
+companies AS (SELECT * FROM {{ ref('stg_companies') }}),
+
 financials AS (
     SELECT
         cik,
@@ -20,11 +22,16 @@ financials AS (
     QUALIFY rn = 1
 ),
 
-sectors AS (
-    SELECT sic_code,
+-- Sector mapping. Update the CASE after looking at your real SIC distribution.
+sector_map AS (
+    SELECT
+        cik,
+        sic_code,
+        sic_description,
         CASE
             WHEN sic_code BETWEEN '7370' AND '7379' THEN 'Software & IT Services'
             WHEN sic_code BETWEEN '2830' AND '2839' THEN 'Pharmaceuticals'
+            WHEN sic_code = '8731' THEN 'Biotech R&D'
             WHEN sic_code BETWEEN '3840' AND '3849' THEN 'Medical Devices'
             WHEN sic_code BETWEEN '6020' AND '6029' THEN 'Banks'
             WHEN sic_code BETWEEN '6311' AND '6411' THEN 'Insurance'
@@ -32,21 +39,28 @@ sectors AS (
             WHEN sic_code BETWEEN '5800' AND '5899' THEN 'Restaurants & Retail'
             WHEN sic_code BETWEEN '1311' AND '1389' THEN 'Oil & Gas'
             WHEN sic_code BETWEEN '4812' AND '4899' THEN 'Telecom'
+            WHEN sic_code = '6798' THEN 'REITs'
+            WHEN sic_code = '6726' THEN 'Investment Funds'
             ELSE 'Other'
         END AS sector
-    FROM filings GROUP BY sic_code
+    FROM companies
 ),
 
 base AS (
     SELECT
-        f.cik, f.company_name, f.filing_date, f.accession_number,
-        f.sic_code, s.sector,
-        t.shares_offered, t.final_price, t.gross_proceeds,
+        f.cik,
+        f.company_name,
+        f.filing_date,
+        f.accession_number,
+        sm.sic_code,
+        sm.sic_description,
+        sm.sector,
+        t.shares_offered,
+        t.final_price,
+        t.gross_proceeds,
         t.extraction_method,
-        t.offering_type,
-        fin.trailing_revenue, fin.shares_outstanding,
-        -- True implied market cap requires post-IPO shares outstanding,
-        -- not just shares offered. Fall back to shares_offered when missing.
+        fin.trailing_revenue,
+        fin.shares_outstanding,
         COALESCE(fin.shares_outstanding, t.shares_offered) * t.final_price
             AS implied_market_cap,
         CASE
@@ -58,7 +72,7 @@ base AS (
         DATE_TRUNC('year', f.filing_date) AS filing_year
     FROM filings f
     INNER JOIN terms t USING (cik, accession_number)
-    LEFT JOIN sectors s ON f.sic_code = s.sic_code
+    LEFT JOIN sector_map sm ON f.cik = sm.cik
     LEFT JOIN financials fin ON f.cik = fin.cik
 )
 
