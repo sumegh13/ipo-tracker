@@ -38,13 +38,46 @@ def prospectus_ingestion():
         return out
 
     @task
-    def extract_terms_batch(filings: list[dict]) -> list[dict]:
-        """Single task that loops, respecting the 10 req/s EDGAR rate limit.
-        
-        We process sequentially in one task rather than using .expand() because
-        parallel tasks would each open their own EDGAR session and easily breach
-        the rate limit. 0.15s sleep keeps us well under 10/s.
+    def fetch_company_metadata(filings: list[dict]) -> list[dict]:
+        """For each unique CIK, fetch metadata from the submissions API.
+
+        We hit data.sec.gov/submissions/CIK{padded}.json which returns
+        sic, sicDescription, stateOfIncorporation, fiscalYearEnd, etc.
         """
+        import requests
+        if not filings:
+            return []
+
+        unique_ciks = {f["cik"] for f in filings}
+        headers = {"User-Agent": os.environ["EDGAR_IDENTITY"]}
+        companies = []
+
+        for cik in unique_ciks:
+            padded = cik.zfill(10)
+            url = f"https://data.sec.gov/submissions/CIK{padded}.json"
+            try:
+                r = requests.get(url, headers=headers, timeout=30)
+                if r.status_code == 404:
+                    continue
+                r.raise_for_status()
+                data = r.json()
+                companies.append({
+                    "cik": cik,
+                    "company_name": data.get("name"),
+                    "sic_code": data.get("sic"),
+                    "sic_description": data.get("sicDescription"),
+                    "state_of_incorp": data.get("stateOfIncorporation"),
+                    "fiscal_year_end": data.get("fiscalYearEnd"),
+                })
+                time.sleep(0.15)  # EDGAR rate limit
+            except Exception as e:
+                print(f"Company metadata fetch failed for CIK {cik}: {e}")
+
+        return companies
+
+    @task
+    def extract_terms_batch(filings: list[dict]) -> list[dict]:
+        """Sequential extraction; respects EDGAR's 10 req/s limit."""
         import requests
         from dataclasses import asdict
         from extractor import extract_offering_terms
@@ -64,7 +97,6 @@ def prospectus_ingestion():
                 })
                 time.sleep(0.15)
             except Exception as e:
-                # Log and continue — don't kill the whole DAG for one bad filing
                 print(f"Extraction failed for {f['company_name']}: {e}")
                 results.append({
                     "cik": f["cik"],
@@ -76,6 +108,43 @@ def prospectus_ingestion():
                     "extraction_method": "error",
                 })
         return results
+
+    @task
+    def upsert_companies(companies: list[dict]):
+        """Insert new companies; update existing ones via MERGE."""
+        from airflow.providers.snowflake.hooks.snowflake import SnowflakeHook
+        if not companies:
+            return
+        hook = SnowflakeHook(snowflake_conn_id="snowflake_default")
+        conn = hook.get_conn()
+        cur = conn.cursor()
+
+        # MERGE = upsert. Snowflake's idiomatic pattern.
+        for c in companies:
+            cur.execute("""
+                MERGE INTO RAW.COMPANIES tgt
+                USING (SELECT %s AS cik, %s AS company_name, %s AS sic_code,
+                              %s AS sic_description, %s AS state_of_incorp,
+                              %s AS fiscal_year_end) src
+                ON tgt.cik = src.cik
+                WHEN MATCHED THEN UPDATE SET
+                    company_name = src.company_name,
+                    sic_code = src.sic_code,
+                    sic_description = src.sic_description,
+                    state_of_incorp = src.state_of_incorp,
+                    fiscal_year_end = src.fiscal_year_end,
+                    ingested_at = CURRENT_TIMESTAMP()
+                WHEN NOT MATCHED THEN INSERT
+                    (cik, company_name, sic_code, sic_description,
+                     state_of_incorp, fiscal_year_end)
+                    VALUES (src.cik, src.company_name, src.sic_code,
+                            src.sic_description, src.state_of_incorp,
+                            src.fiscal_year_end)
+            """, (c["cik"], c.get("company_name"), c.get("sic_code"),
+                  c.get("sic_description"), c.get("state_of_incorp"),
+                  c.get("fiscal_year_end")))
+        conn.commit()
+        cur.close()
 
     @task
     def load_filings(filings: list[dict]):
@@ -116,8 +185,11 @@ def prospectus_ingestion():
         )
 
     filings = fetch_424b4_filings()
-    load_filings(filings)
+    companies = fetch_company_metadata(filings)
     terms = extract_terms_batch(filings)
+
+    upsert_companies(companies)
+    load_filings(filings)
     load_terms(terms)
 
 prospectus_ingestion()
